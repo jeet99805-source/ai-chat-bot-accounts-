@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Accounting AI Learning App</title>
+<title>Accounting AI Tutor</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -14,107 +14,102 @@
 
 <style>
 
-body{
-font-family:system-ui;
-}
-
 .keyword{
-color:#4f46e5;
+color:#4F46E5;
 font-weight:600;
 }
 
-.card{
-background:white;
-border-radius:12px;
-padding:16px;
-box-shadow:0 8px 20px rgba(0,0,0,0.08);
-}
-
 .mnemonic{
-background:#FEF3C7;
+background:#FEF9C3;
 border-left:6px solid #F59E0B;
 padding:12px;
 border-radius:8px;
 margin-top:10px;
 }
 
-.taccount{
-display:flex;
-border:2px solid #ddd;
-border-radius:8px;
-overflow:hidden;
-margin-top:10px;
-}
-
-.tcol{
-flex:1;
-padding:10px;
-}
-
 </style>
 
 </head>
 
-<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen flex flex-col">
+<body class="bg-gradient-to-br from-white via-purple-50 to-pink-50 min-h-screen flex flex-col">
+
+<div id="loading" class="flex items-center justify-center h-screen text-xl">
+Loading AI Tutor...
+</div>
+
+<div id="app" class="hidden flex flex-col min-h-screen">
+
 
 <!-- HEADER -->
 
-<div class="bg-white shadow p-4 flex justify-between">
+<div class="p-4 flex justify-between items-center bg-white shadow">
 
 <h1 class="font-bold text-lg">
-📘 Accounting AI Learning
+📘 Accounting AI Tutor
 </h1>
 
-<button onclick="downloadNotes()" class="bg-indigo-600 text-white px-3 py-1 rounded">
-Export Notes
+<div class="flex gap-3">
+
+<select id="mode" class="border rounded px-2 py-1">
+<option>Simple</option>
+<option>Detailed</option>
+<option>Exam Style</option>
+</select>
+
+<button id="settingsBtn"
+class="px-3 py-2 bg-gray-200 rounded">
+⚙ Settings
 </button>
 
 </div>
 
-
-<!-- MAIN GRID -->
-
-<div class="grid md:grid-cols-4 flex-1 gap-4 p-4">
-
-
-<!-- SIDEBAR -->
-
-<div class="space-y-4">
-
-<div class="card">
-
-<h2 class="font-semibold mb-2">
-Tools
-</h2>
-
-<button onclick="showSection('chat')" class="block mb-2">AI Tutor</button>
-<button onclick="showSection('flashcards')" class="block mb-2">Flashcards</button>
-<button onclick="showSection('quiz')" class="block mb-2">Quiz</button>
-<button onclick="showSection('taccount')" class="block mb-2">T Account</button>
-<button onclick="showSection('calculator')" class="block">Calculator</button>
-
 </div>
 
-</div>
-
-
-<!-- MAIN AREA -->
-
-<div class="md:col-span-3 space-y-4">
 
 <!-- CHAT -->
 
-<div id="chatSection" class="card">
+<div id="chat"
+class="flex-1 overflow-y-auto p-6 space-y-4">
 
-<h2 class="font-semibold mb-4">AI Accounting Tutor</h2>
+<div id="welcome" class="text-center mt-32">
 
-<div id="chat" class="space-y-4 max-h-[400px] overflow-y-auto"></div>
+<div class="text-4xl mb-6">✨</div>
 
-<div class="flex mt-4">
+<h1 class="text-3xl font-semibold mb-6">
+Ask your Accounting AI anything
+</h1>
 
-<input id="input" class="flex-1 border rounded px-3 py-2" placeholder="Ask accounting question">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
 
-<button onclick="sendMessage()" class="ml-2 bg-indigo-600 text-white px-4 py-2 rounded">
+<button class="suggestion bg-white p-4 rounded shadow">
+What is a journal entry?
+</button>
+
+<button class="suggestion bg-white p-4 rounded shadow">
+Explain trial balance
+</button>
+
+<button class="suggestion bg-white p-4 rounded shadow">
+How to prepare balance sheet?
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- INPUT BAR -->
+
+<div class="p-4 bg-white border-t flex">
+
+<input id="input"
+class="flex-1 border rounded px-3 py-2"
+placeholder="Ask accounting question..." />
+
+<button id="send"
+class="ml-2 bg-indigo-500 text-white px-4 py-2 rounded">
 Send
 </button>
 
@@ -123,92 +118,37 @@ Send
 </div>
 
 
-<!-- FLASHCARDS -->
+<!-- SETTINGS MODAL -->
 
-<div id="flashcardsSection" class="card hidden">
+<div id="settingsModal"
+class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center">
 
-<h2 class="font-semibold mb-4">Flashcards</h2>
+<div class="bg-white p-6 rounded w-96">
 
-<div id="flashcard" class="text-center text-xl p-10 bg-indigo-50 rounded"></div>
+<h2 class="font-bold mb-4">
+Settings
+</h2>
 
-<button onclick="nextFlashcard()" class="mt-4 bg-indigo-600 text-white px-3 py-2 rounded">
-Next
+<label class="block mb-2">
+OpenRouter API Key
+</label>
+
+<input id="apiKey"
+type="password"
+class="border w-full p-2 mb-4">
+
+<label class="block mb-2">
+Model
+</label>
+
+<input id="model"
+class="border w-full p-2 mb-4"
+value="deepseek/deepseek-r1:free">
+
+<button id="saveSettings"
+class="bg-indigo-500 text-white px-4 py-2 rounded">
+Save
 </button>
-
-</div>
-
-
-<!-- QUIZ -->
-
-<div id="quizSection" class="card hidden">
-
-<h2 class="font-semibold mb-4">Quiz</h2>
-
-<div id="quizQuestion"></div>
-
-<div id="quizOptions" class="space-y-2 mt-4"></div>
-
-</div>
-
-
-<!-- T ACCOUNT -->
-
-<div id="taccountSection" class="card hidden">
-
-<h2 class="font-semibold mb-4">T Account Visualizer</h2>
-
-<div class="taccount">
-
-<div class="tcol">
-
-<h3 class="font-semibold">Debit</h3>
-<ul id="debitList"></ul>
-
-</div>
-
-<div class="tcol border-l">
-
-<h3 class="font-semibold">Credit</h3>
-<ul id="creditList"></ul>
-
-</div>
-
-</div>
-
-<div class="flex mt-4 gap-2">
-
-<input id="ttext" class="border px-2 py-1" placeholder="Account">
-
-<select id="ttype" class="border px-2 py-1">
-<option>Debit</option>
-<option>Credit</option>
-</select>
-
-<button onclick="addT()" class="bg-indigo-600 text-white px-3 py-1 rounded">
-Add
-</button>
-
-</div>
-
-</div>
-
-
-<!-- CALCULATOR -->
-
-<div id="calculatorSection" class="card hidden">
-
-<h2 class="font-semibold mb-4">Accounting Calculator</h2>
-
-<input id="rev" placeholder="Revenue" class="border px-2 py-1 mb-2 block">
-<input id="cost" placeholder="Cost" class="border px-2 py-1 mb-2 block">
-
-<button onclick="calcProfit()" class="bg-indigo-600 text-white px-3 py-2 rounded">
-Calculate Profit
-</button>
-
-<div id="profitResult" class="mt-4 text-lg"></div>
-
-</div>
 
 </div>
 
@@ -217,40 +157,72 @@ Calculate Profit
 
 <script>
 
-let apiKey = ""
-let model = "deepseek/deepseek-r1:free"
 
-let messages=[{
+let apiKey = localStorage.getItem("apiKey") || ""
+let model = localStorage.getItem("model") || "deepseek/deepseek-r1:free"
+
+document.getElementById("apiKey").value = apiKey
+document.getElementById("model").value = model
+
+
+let messages = JSON.parse(localStorage.getItem("messages") || "[]")
+
+
+if(messages.length === 0){
+
+messages = [
+{
 role:"system",
 content:`
+
 You are an expert accounting tutor.
 
-Structure answers using:
+Always explain using:
 
 ### Concept
-Explain clearly.
+Explain the theory clearly.
 
 ### Example
-Show journal entry.
+Show journal entries or numbers.
 
 ### Explanation
-Step by step.
+Explain step-by-step.
 
 ### Mnemonic
-Memory trick.
+Give a memory trick.
 
-Highlight accounting keywords like Debit, Credit.
+Highlight accounting words like:
+Debit, Credit, Assets, Liabilities.
 `
-}]
+}
+]
+
+}
 
 
-function highlight(text){
+function highlightKeywords(text){
 
-let words=["Debit","Credit","Assets","Liabilities","Capital","Revenue","Expense"]
+let words = [
+"Debit",
+"Credit",
+"Assets",
+"Asset",
+"Liabilities",
+"Liability",
+"Capital",
+"Revenue",
+"Expense"
+]
 
-words.forEach(w=>{
-let r=new RegExp("\\b"+w+"\\b","g")
-text=text.replace(r,"<span class='keyword'>"+w+"</span>")
+words.forEach(w => {
+
+let r = new RegExp("\\b"+w+"\\b","g")
+
+text = text.replace(
+r,
+"<span class='keyword'>"+w+"</span>"
+)
+
 })
 
 return text
@@ -258,178 +230,176 @@ return text
 }
 
 
-function render(role,content){
 
-let chat=document.getElementById("chat")
+function renderMessage(role,content){
 
-let div=document.createElement("div")
+let chat = document.getElementById("chat")
 
-div.className=role==="user"?"text-right":"text-left"
+let div = document.createElement("div")
 
-div.innerHTML=`
-<div class="inline-block card">
-${marked.parse(highlight(content))}
+div.className =
+role==="user"
+? "flex justify-end"
+: "flex justify-start"
+
+let bubbleClass =
+role==="user"
+? "bg-indigo-500 text-white"
+: "bg-white border"
+
+let avatar =
+role==="user"
+? "🧑"
+: "🤖"
+
+content = highlightKeywords(content)
+
+div.innerHTML = `
+<div class="flex gap-3 max-w-2xl">
+
+<div class="text-xl">${avatar}</div>
+
+<div class="shadow-md rounded-xl px-4 py-3 ${bubbleClass}">
+${marked.parse(content)}
+</div>
+
 </div>
 `
 
 chat.appendChild(div)
 
-chat.scrollTop=chat.scrollHeight
+chat.scrollTop = chat.scrollHeight
 
 }
 
 
+
+messages.forEach(m=>{
+if(m.role!=="system")
+renderMessage(m.role,m.content)
+})
+
+
+
 async function sendMessage(){
 
-let input=document.getElementById("input")
-let text=input.value
+let input = document.getElementById("input")
 
-if(!text)return
+let text = input.value.trim()
 
-render("user",text)
+if(!text) return
+
+document.getElementById("welcome").style.display="none"
+
+renderMessage("user",text)
 
 messages.push({role:"user",content:text})
 
 input.value=""
 
-render("assistant","Thinking...")
+localStorage.setItem("messages",JSON.stringify(messages))
 
-let response=await fetch(
+
+renderMessage("assistant","⏳ Thinking...")
+
+
+let response = await fetch(
 "https://openrouter.ai/api/v1/chat/completions",
 {
 method:"POST",
+
 headers:{
 "Authorization":"Bearer "+apiKey,
-"Content-Type":"application/json"
+"Content-Type":"application/json",
+"HTTP-Referer":window.location.origin,
+"X-Title":"Accounting AI Tutor"
 },
+
 body:JSON.stringify({
 model:model,
 messages:messages
 })
+
 })
 
-let data=await response.json()
 
-let reply=data.choices?.[0]?.message?.content||"Error"
+let data = await response.json()
+
+let reply =
+data.choices?.[0]?.message?.content
+|| "API Error"
 
 messages.push({role:"assistant",content:reply})
 
-render("assistant",reply)
+localStorage.setItem("messages",JSON.stringify(messages))
+
+renderMessage("assistant",reply)
 
 }
 
 
 
-function showSection(name){
-
-["chat","flashcards","quiz","taccount","calculator"].forEach(s=>{
-document.getElementById(s+"Section").classList.add("hidden")
-})
-
-document.getElementById(name+"Section").classList.remove("hidden")
-
-}
+document.getElementById("send").onclick = sendMessage
 
 
-
-let flashcards=[
-{q:"What is Debit?",a:"Left side of account"},
-{q:"What is Credit?",a:"Right side of account"},
-{q:"Accounting equation?",a:"Assets = Liabilities + Capital"}
-]
-
-let fc=0
-
-function nextFlashcard(){
-
-let f=flashcards[fc]
-
-document.getElementById("flashcard").innerText=f.q+" → "+f.a
-
-fc=(fc+1)%flashcards.length
-
-}
-
-
-
-let quiz={
-q:"Assets = ?",
-options:[
-"Liabilities + Capital",
-"Revenue - Cost",
-"Profit + Expenses"
-],
-answer:0
-}
-
-document.getElementById("quizQuestion").innerText=quiz.q
-
-quiz.options.forEach((o,i)=>{
-
-let btn=document.createElement("button")
-
-btn.className="block border px-3 py-2 rounded"
-
-btn.innerText=o
-
-btn.onclick=()=>{
-
-if(i===quiz.answer)alert("Correct")
-else alert("Wrong")
-
-}
-
-document.getElementById("quizOptions").appendChild(btn)
-
+document.getElementById("input").addEventListener("keypress",e=>{
+if(e.key==="Enter") sendMessage()
 })
 
 
-function addT(){
+document.querySelectorAll(".suggestion").forEach(btn=>{
+btn.onclick = ()=>{
+document.getElementById("input").value = btn.innerText
+sendMessage()
+}
+})
 
-let text=document.getElementById("ttext").value
-let type=document.getElementById("ttype").value
 
-let li=document.createElement("li")
+document.getElementById("settingsBtn").onclick=()=>{
 
-li.innerText=text
-
-if(type==="Debit")
-document.getElementById("debitList").appendChild(li)
-else
-document.getElementById("creditList").appendChild(li)
+document.getElementById("settingsModal").classList.remove("hidden")
+document.getElementById("settingsModal").classList.add("flex")
 
 }
 
 
+document.getElementById("saveSettings").onclick=()=>{
 
-function calcProfit(){
+apiKey = document.getElementById("apiKey").value
+model = document.getElementById("model").value
 
-let rev=parseFloat(document.getElementById("rev").value||0)
-let cost=parseFloat(document.getElementById("cost").value||0)
+localStorage.setItem("apiKey",apiKey)
+localStorage.setItem("model",model)
 
-let profit=rev-cost
+document.getElementById("settingsModal").classList.add("hidden")
 
-document.getElementById("profitResult").innerText="Profit = "+profit
+}
+
+
+document.getElementById("loading").style.display="none"
+document.getElementById("app").classList.remove("hidden")
+
+
+
+function createChart(){
+
+let canvas = document.createElement("canvas")
+
+document.getElementById("chat").appendChild(canvas)
+
+new Chart(canvas,{
+type:"bar",
+data:{
+labels:["Assets","Liabilities","Capital"],
+datasets:[{
+label:"Balance Sheet Example",
+data:[100000,40000,60000]
+}]
+}
+})
 
 }
 
-
-
-function downloadNotes(){
-
-let text=messages.map(m=>m.role+": "+m.content).join("\n\n")
-
-let blob=new Blob([text])
-
-let a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-
-a.download="accounting_notes.txt"
-
-a.click()
-
-}
 
 </script>
 
