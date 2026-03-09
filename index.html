@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
@@ -10,24 +9,6 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-.keyword{
-color:#4F46E5;
-font-weight:600;
-}
-
-.mnemonic{
-background:#FEF9C3;
-border-left:6px solid #F59E0B;
-padding:12px;
-border-radius:8px;
-margin-top:10px;
-}
-
-</style>
 
 </head>
 
@@ -39,7 +20,6 @@ Loading AI Tutor...
 
 <div id="app" class="hidden flex flex-col min-h-screen">
 
-
 <!-- HEADER -->
 
 <div class="p-4 flex justify-between items-center bg-white shadow">
@@ -48,20 +28,10 @@ Loading AI Tutor...
 📘 Accounting AI Tutor
 </h1>
 
-<div class="flex gap-3">
-
-<select id="mode" class="border rounded px-2 py-1">
-<option>Simple</option>
-<option>Detailed</option>
-<option>Exam Style</option>
-</select>
-
 <button id="settingsBtn"
 class="px-3 py-2 bg-gray-200 rounded">
 ⚙ Settings
 </button>
-
-</div>
 
 </div>
 
@@ -174,61 +144,25 @@ messages = [
 {
 role:"system",
 content:`
-
 You are an expert accounting tutor.
 
-Always explain using:
+You teach accounting from:
 
-### Concept
-Explain the theory clearly.
+• Class 11
+• Class 12
+• CA Foundation
+• CMA level
+• Cost Accounting
+• Financial Statements
 
-### Example
-Show journal entries or numbers.
+Always explain step-by-step.
 
-### Explanation
-Explain step-by-step.
-
-### Mnemonic
-Give a memory trick.
-
-Highlight accounting words like:
-Debit, Credit, Assets, Liabilities.
+Use journal entries and tables when needed.
 `
 }
 ]
 
 }
-
-
-function highlightKeywords(text){
-
-let words = [
-"Debit",
-"Credit",
-"Assets",
-"Asset",
-"Liabilities",
-"Liability",
-"Capital",
-"Revenue",
-"Expense"
-]
-
-words.forEach(w => {
-
-let r = new RegExp("\\b"+w+"\\b","g")
-
-text = text.replace(
-r,
-"<span class='keyword'>"+w+"</span>"
-)
-
-})
-
-return text
-
-}
-
 
 
 function renderMessage(role,content){
@@ -239,32 +173,18 @@ let div = document.createElement("div")
 
 div.className =
 role==="user"
-? "flex justify-end"
-: "flex justify-start"
+? "text-right"
+: "text-left"
 
 let bubbleClass =
 role==="user"
 ? "bg-indigo-500 text-white"
-: "bg-white border"
+: "bg-white"
 
-let avatar =
-role==="user"
-? "🧑"
-: "🤖"
-
-content = highlightKeywords(content)
-
-div.innerHTML = `
-<div class="flex gap-3 max-w-2xl">
-
-<div class="text-xl">${avatar}</div>
-
-<div class="shadow-md rounded-xl px-4 py-3 ${bubbleClass}">
-${marked.parse(content)}
-</div>
-
-</div>
-`
+div.innerHTML =
+'<div class="inline-block shadow-md rounded-xl px-4 py-3 '+bubbleClass+'">'+
+marked.parse(content)+
+'</div>'
 
 chat.appendChild(div)
 
@@ -273,12 +193,10 @@ chat.scrollTop = chat.scrollHeight
 }
 
 
-
 messages.forEach(m=>{
 if(m.role!=="system")
 renderMessage(m.role,m.content)
 })
-
 
 
 async function sendMessage(){
@@ -300,9 +218,6 @@ input.value=""
 localStorage.setItem("messages",JSON.stringify(messages))
 
 
-renderMessage("assistant","⏳ Thinking...")
-
-
 let response = await fetch(
 "https://openrouter.ai/api/v1/chat/completions",
 {
@@ -322,12 +237,11 @@ messages:messages
 
 })
 
-
 let data = await response.json()
 
 let reply =
 data.choices?.[0]?.message?.content
-|| "API Error"
+|| JSON.stringify(data)
 
 messages.push({role:"assistant",content:reply})
 
@@ -338,9 +252,7 @@ renderMessage("assistant",reply)
 }
 
 
-
 document.getElementById("send").onclick = sendMessage
-
 
 document.getElementById("input").addEventListener("keypress",e=>{
 if(e.key==="Enter") sendMessage()
@@ -378,27 +290,6 @@ document.getElementById("settingsModal").classList.add("hidden")
 
 document.getElementById("loading").style.display="none"
 document.getElementById("app").classList.remove("hidden")
-
-
-
-function createChart(){
-
-let canvas = document.createElement("canvas")
-
-document.getElementById("chat").appendChild(canvas)
-
-new Chart(canvas,{
-type:"bar",
-data:{
-labels:["Assets","Liabilities","Capital"],
-datasets:[{
-label:"Balance Sheet Example",
-data:[100000,40000,60000]
-}]
-}
-})
-
-}
 
 
 </script>
