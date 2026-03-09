@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Universal AI Chat</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+<div id="loading" class="fixed inset-0 flex items-center justify-center text-lg">
+Loading App...
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="w-64 bg-white border-r p-4 hidden md:block">
+
+<h2 class="font-bold mb-4">Chats</h2>
+
+<button id="newChat"
+class="bg-blue-500 text-white px-3 py-2 rounded w-full mb-4">
+New Chat
+</button>
+
+<div id="chatList"></div>
+
+<hr class="my-4">
+
+<button id="settingsBtn"
+class="bg-gray-200 px-3 py-2 rounded w-full mb-2">
+Settings
+</button>
+
+<button id="darkToggle"
+class="bg-gray-200 px-3 py-2 rounded w-full">
+Toggle Dark
+</button>
+
+</div>
+
+<!-- MAIN AREA -->
+<div class="flex-1 flex flex-col">
+
+<!-- HEADER -->
+<div class="p-4 border-b bg-white flex justify-between">
+
+<button id="mobileMenu" class="md:hidden">☰</button>
+
+<h1 class="font-bold">Universal AI Assistant</h1>
+
+</div>
+
+<!-- CHAT AREA -->
+<div id="chat"
+class="flex-1 overflow-y-auto p-6 space-y-4">
+</div>
+
+<!-- INPUT -->
+<div class="border-t bg-white p-4 flex">
+
+<input id="input"
+class="flex-1 border rounded px-3 py-2"
+placeholder="Ask anything..." />
+
+<button id="send"
+class="ml-2 bg-blue-500 text-white px-4 py-2 rounded">
+Send
+</button>
+
+</div>
+
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsModal"
+class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+
+<div class="bg-white p-6 rounded w-96">
+
+<h2 class="font-bold mb-4">Settings</h2>
+
+<label class="block mb-2">OpenRouter API Key</label>
+<input id="apiKey" type="password"
+class="border w-full p-2 mb-4"/>
+
+<label class="block mb-2">Model</label>
+<input id="model"
+class="border w-full p-2 mb-4"
+value="deepseek/deepseek-r1:free"/>
+
+<button id="saveSettings"
+class="bg-blue-500 text-white px-4 py-2 rounded">
+Save
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let apiKey = localStorage.getItem("apiKey") || ""
+let model = localStorage.getItem("model") || "deepseek/deepseek-r1:free"
+
+document.getElementById("apiKey").value = apiKey
+document.getElementById("model").value = model
+
+let messages = []
+
+function renderMessage(role,content){
+
+let chat = document.getElementById("chat")
+
+let div = document.createElement("div")
+
+div.className = role==="user"
+? "text-right"
+: "text-left"
+
+div.innerHTML =
+'<div class="inline-block bg-gray-200 rounded p-3">'+
+marked.parse(content)+
+'</div>'
+
+chat.appendChild(div)
+
+chat.scrollTop = chat.scrollHeight
+
+}
+
+async function sendMessage(){
+
+let input = document.getElementById("input")
+
+let text = input.value.trim()
+
+if(!text) return
+
+renderMessage("user",text)
+
+messages.push({role:"user",content:text})
+
+input.value=""
+
+let response = await fetch(
+"https://openrouter.ai/api/v1/chat/completions",
+{
+method:"POST",
+headers:{
+"Authorization":"Bearer "+apiKey,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+model:model,
+messages:messages
+})
+})
+
+let data = await response.json()
+
+let reply = data.choices?.[0]?.message?.content || "Error"
+
+messages.push({role:"assistant",content:reply})
+
+renderMessage("assistant",reply)
+
+}
+
+document.getElementById("send").onclick = sendMessage
+
+document.getElementById("input").addEventListener("keypress",e=>{
+if(e.key==="Enter") sendMessage()
+})
+
+document.getElementById("settingsBtn").onclick=()=>{
+document.getElementById("settingsModal").classList.remove("hidden")
+document.getElementById("settingsModal").classList.add("flex")
+}
+
+document.getElementById("saveSettings").onclick=()=>{
+
+apiKey = document.getElementById("apiKey").value
+model = document.getElementById("model").value
+
+localStorage.setItem("apiKey",apiKey)
+localStorage.setItem("model",model)
+
+document.getElementById("settingsModal").classList.add("hidden")
+
+}
+
+document.getElementById("darkToggle").onclick=()=>{
+document.body.classList.toggle("bg-gray-900")
+document.body.classList.toggle("text-white")
+}
+
+document.getElementById("mobileMenu").onclick=()=>{
+let s=document.getElementById("sidebar")
+s.classList.toggle("hidden")
+}
+
+document.getElementById("loading").style.display="none"
+
+</script>
+
+</body>
+</html>
