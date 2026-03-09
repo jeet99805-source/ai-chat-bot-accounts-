@@ -1,74 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Universal AI Chat</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Accounting AI Tutor</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 </head>
 
-<body class="bg-gray-100 min-h-screen flex">
+<body class="bg-gradient-to-br from-white via-purple-50 to-pink-50 min-h-screen flex flex-col">
 
-<div id="loading" class="fixed inset-0 flex items-center justify-center text-lg">
-Loading App...
+<div id="loading" class="flex items-center justify-center h-screen text-xl">
+Loading AI Tutor...
 </div>
 
-<!-- SIDEBAR -->
-<div id="sidebar" class="w-64 bg-white border-r p-4 hidden md:block">
-
-<h2 class="font-bold mb-4">Chats</h2>
-
-<button id="newChat"
-class="bg-blue-500 text-white px-3 py-2 rounded w-full mb-4">
-New Chat
-</button>
-
-<div id="chatList"></div>
-
-<hr class="my-4">
-
-<button id="settingsBtn"
-class="bg-gray-200 px-3 py-2 rounded w-full mb-2">
-Settings
-</button>
-
-<button id="darkToggle"
-class="bg-gray-200 px-3 py-2 rounded w-full">
-Toggle Dark
-</button>
-
-</div>
-
-<!-- MAIN AREA -->
-<div class="flex-1 flex flex-col">
+<div id="app" class="hidden flex flex-col min-h-screen">
 
 <!-- HEADER -->
-<div class="p-4 border-b bg-white flex justify-between">
 
-<button id="mobileMenu" class="md:hidden">☰</button>
+<div class="p-4 flex justify-between items-center bg-white shadow">
 
-<h1 class="font-bold">Universal AI Assistant</h1>
+<h1 class="font-bold text-lg">
+📘 Accounting AI Tutor
+</h1>
+
+<button id="settingsBtn"
+class="px-3 py-2 bg-gray-200 rounded">
+⚙ Settings
+</button>
 
 </div>
 
-<!-- CHAT AREA -->
+
+<!-- CHAT -->
+
 <div id="chat"
 class="flex-1 overflow-y-auto p-6 space-y-4">
+
+<div id="welcome" class="text-center mt-32">
+
+<div class="text-4xl mb-6">✨</div>
+
+<h1 class="text-3xl font-semibold mb-6">
+Ask your Accounting AI anything
+</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+
+<button class="suggestion bg-white p-4 rounded shadow">
+What is a journal entry?
+</button>
+
+<button class="suggestion bg-white p-4 rounded shadow">
+Explain trial balance
+</button>
+
+<button class="suggestion bg-white p-4 rounded shadow">
+How to prepare balance sheet?
+</button>
+
 </div>
 
-<!-- INPUT -->
-<div class="border-t bg-white p-4 flex">
+</div>
+
+</div>
+
+
+<!-- INPUT BAR -->
+
+<div class="p-4 bg-white border-t flex">
 
 <input id="input"
 class="flex-1 border rounded px-3 py-2"
-placeholder="Ask anything..." />
+placeholder="Ask accounting question..." />
 
 <button id="send"
-class="ml-2 bg-blue-500 text-white px-4 py-2 rounded">
+class="ml-2 bg-indigo-500 text-white px-4 py-2 rounded">
 Send
 </button>
 
@@ -76,25 +87,36 @@ Send
 
 </div>
 
+
 <!-- SETTINGS MODAL -->
+
 <div id="settingsModal"
-class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center">
 
 <div class="bg-white p-6 rounded w-96">
 
-<h2 class="font-bold mb-4">Settings</h2>
+<h2 class="font-bold mb-4">
+Settings
+</h2>
 
-<label class="block mb-2">OpenRouter API Key</label>
-<input id="apiKey" type="password"
-class="border w-full p-2 mb-4"/>
+<label class="block mb-2">
+OpenRouter API Key
+</label>
 
-<label class="block mb-2">Model</label>
+<input id="apiKey"
+type="password"
+class="border w-full p-2 mb-4">
+
+<label class="block mb-2">
+Model
+</label>
+
 <input id="model"
 class="border w-full p-2 mb-4"
-value="deepseek/deepseek-r1:free"/>
+value="deepseek/deepseek-r1:free">
 
 <button id="saveSettings"
-class="bg-blue-500 text-white px-4 py-2 rounded">
+class="bg-indigo-500 text-white px-4 py-2 rounded">
 Save
 </button>
 
@@ -102,7 +124,9 @@ Save
 
 </div>
 
+
 <script>
+
 
 let apiKey = localStorage.getItem("apiKey") || ""
 let model = localStorage.getItem("model") || "deepseek/deepseek-r1:free"
@@ -110,7 +134,36 @@ let model = localStorage.getItem("model") || "deepseek/deepseek-r1:free"
 document.getElementById("apiKey").value = apiKey
 document.getElementById("model").value = model
 
-let messages = []
+
+let messages = JSON.parse(localStorage.getItem("messages") || "[]")
+
+
+if(messages.length === 0){
+
+messages = [
+{
+role:"system",
+content:`
+You are an expert accounting tutor.
+
+You teach accounting from:
+
+• Class 11
+• Class 12
+• CA Foundation
+• CMA level
+• Cost Accounting
+• Financial Statements
+
+Always explain step-by-step.
+
+Use journal entries and tables when needed.
+`
+}
+]
+
+}
+
 
 function renderMessage(role,content){
 
@@ -118,12 +171,18 @@ let chat = document.getElementById("chat")
 
 let div = document.createElement("div")
 
-div.className = role==="user"
+div.className =
+role==="user"
 ? "text-right"
 : "text-left"
 
+let bubbleClass =
+role==="user"
+? "bg-indigo-500 text-white"
+: "bg-white"
+
 div.innerHTML =
-'<div class="inline-block bg-gray-200 rounded p-3">'+
+'<div class="inline-block shadow-md rounded-xl px-4 py-3 '+bubbleClass+'">'+
 marked.parse(content)+
 '</div>'
 
@@ -133,6 +192,13 @@ chat.scrollTop = chat.scrollHeight
 
 }
 
+
+messages.forEach(m=>{
+if(m.role!=="system")
+renderMessage(m.role,m.content)
+})
+
+
 async function sendMessage(){
 
 let input = document.getElementById("input")
@@ -141,35 +207,50 @@ let text = input.value.trim()
 
 if(!text) return
 
+document.getElementById("welcome").style.display="none"
+
 renderMessage("user",text)
 
 messages.push({role:"user",content:text})
 
 input.value=""
 
+localStorage.setItem("messages",JSON.stringify(messages))
+
+
 let response = await fetch(
 "https://openrouter.ai/api/v1/chat/completions",
 {
 method:"POST",
+
 headers:{
 "Authorization":"Bearer "+apiKey,
-"Content-Type":"application/json"
+"Content-Type":"application/json",
+"HTTP-Referer":window.location.origin,
+"X-Title":"Accounting AI Tutor"
 },
+
 body:JSON.stringify({
 model:model,
 messages:messages
 })
+
 })
 
 let data = await response.json()
 
-let reply = data.choices?.[0]?.message?.content || "Error"
+let reply =
+data.choices?.[0]?.message?.content
+|| JSON.stringify(data)
 
 messages.push({role:"assistant",content:reply})
+
+localStorage.setItem("messages",JSON.stringify(messages))
 
 renderMessage("assistant",reply)
 
 }
+
 
 document.getElementById("send").onclick = sendMessage
 
@@ -177,10 +258,22 @@ document.getElementById("input").addEventListener("keypress",e=>{
 if(e.key==="Enter") sendMessage()
 })
 
+
+document.querySelectorAll(".suggestion").forEach(btn=>{
+btn.onclick = ()=>{
+document.getElementById("input").value = btn.innerText
+sendMessage()
+}
+})
+
+
 document.getElementById("settingsBtn").onclick=()=>{
+
 document.getElementById("settingsModal").classList.remove("hidden")
 document.getElementById("settingsModal").classList.add("flex")
+
 }
+
 
 document.getElementById("saveSettings").onclick=()=>{
 
@@ -194,17 +287,10 @@ document.getElementById("settingsModal").classList.add("hidden")
 
 }
 
-document.getElementById("darkToggle").onclick=()=>{
-document.body.classList.toggle("bg-gray-900")
-document.body.classList.toggle("text-white")
-}
-
-document.getElementById("mobileMenu").onclick=()=>{
-let s=document.getElementById("sidebar")
-s.classList.toggle("hidden")
-}
 
 document.getElementById("loading").style.display="none"
+document.getElementById("app").classList.remove("hidden")
+
 
 </script>
 
